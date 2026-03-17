@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinEdge — Finance Career Accelerator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+
+        /* Bloomberg Terminal Aesthetic */
+        .terminal-green { color: #00ff41; }
+        .terminal-bg { background: #0a0e27; }
+
+        /* Glass Finance */
+        .glass-fin {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .dark .glass-fin {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+        }
+
+        /* Ticker Animation */
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .ticker-wrap {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .ticker-content {
+            display: inline-block;
+            animation: ticker 30s linear infinite;
+        }
+
+        /* Stock Up/Down */
+        .stock-up { color: #10b981; }
+        .stock-down { color: #ef4444; }
+
+        /* Gradient Text */
+        .gradient-gold {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Card Hover */
+        .finance-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .finance-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Calculator Inputs */
+        .calc-input {
+            transition: all 0.2s;
+            border: 2px solid #e2e8f0;
+        }
+        .calc-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        /* Terminal Blink */
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .cursor-blink::after {
+            content: '▋';
+            animation: blink 1s infinite;
+            color: #3b82f6;
+            margin-left: 2px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+
+        /* Grid Pattern */
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Pulse for live data */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .live-indicator {
+            animation: pulse-live 2s infinite;
+        }
+
+        /* Interview Card Flip */
+        .flip-card {
+            perspective: 1000px;
+        }
+        .flip-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-front, .flip-back {
+            backface-visibility: hidden;
+        }
+        .flip-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+
+    <!-- Top Ticker -->
+    <div class="bg-slate-900 text-white text-xs py-2 overflow-hidden border-b border-slate-800">
+        <div class="ticker-wrap">
+            <div class="ticker-content mono">
+                <span class="inline-flex items-center gap-4 px-4">
+                    <span class="text-slate-400">SPX</span> <span class="stock-up">▲ 4,783.45 +1.2%</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">NDX</span> <span class="stock-up">▲ 16,824.30 +1.8%</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">DJI</span> <span class="stock-up">▲ 37,545.20 +0.9%</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">VIX</span> <span class="stock-down">▼ 13.45 -5.2%</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">BTC</span> <span class="stock-up">▲ $43,250 +2.4%</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">EUR/USD</span> <span class="stock-down">▼ 1.0845 -0.2%</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">10Y Treasury</span> <span class="text-yellow-400">▲ 4.15%</span>
+                    <!-- Duplicate for seamless loop -->
+                    <span class="text-slate-400 ml-8">SPX</span> <span class="stock-up">▲ 4,783.45 +1.2%</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">NDX</span> <span class="stock-up">▲ 16,824.30 +1.8%</span>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-400">DJI</span> <span class="stock-up">▲ 37,545.20 +0.9%</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-fin border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-lg flex items-center justify-center shadow-lg">
+                            <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight">FinEdge</span>
+                        <span class="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full font-medium">PRO</span>
+                    </div>
+
+                    <div class="hidden md:flex items-center gap-1">
+                        <button onclick="switchTab('dashboard')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-blue-600 dark:text-blue-400" data-tab="dashboard">Dashboard</button>
+                        <button onclick="switchTab('career')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-tab="career">Career Hub</button>
+                        <button onclick="switchTab('invest')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-tab="invest">Investment Lab</button>
+                        <button onclick="switchTab('tools')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-tab="tools">Financial Tools</button>
+                        <button onclick="switchTab('learn')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" data-tab="learn">Learn</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+                    <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm font-semibold">James Mitchell</p>
+                            <p class="text-xs text-slate-500">Finance Major • Junior Year</p>
+                        </div>
+                        <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard-panel" class="tab-panel space-y-6">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-slate-900 to-blue-900 rounded-2xl p-8 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="live-indicator w-2 h-2 bg-green-400 rounded-full"></span>
+                        <span class="text-sm text-blue-200">Market Open</span>
+                    </div>
+                    <h1 class="text-3xl font-bold mb-2">Welcome back, James</h1>
+                    <p class="text-blue-100 max-w-2xl">Your portfolio is up <span class="font-bold text-green-400">+12.4%</span> this month. You have 3 interview prep sessions scheduled this week and 2 new job matches in Investment Banking.</p>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-slate-500">Portfolio Value</span>
+                        <i data-lucide="wallet" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <p class="text-2xl font-bold mono">$24,532.80</p>
+                    <p class="text-sm text-green-600 flex items-center gap-1 mt-1">
+                        <i data-lucide="trending-up" class="w-3 h-3"></i>
+                        +$2,721 (12.4%)
+                    </p>
+                </div>
+
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-slate-500">Student Loans</span>
+                        <i data-lucide="graduation-cap" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <p class="text-2xl font-bold mono">$18,400</p>
+                    <p class="text-sm text-blue-600 flex items-center gap-1 mt-1">
+                        <i data-lucide="arrow-down" class="w-3 h-3"></i>
+                        -$1,200 paid this year
+                    </p>
+                </div>
+
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-slate-500">Interview Readiness</span>
+                        <i data-lucide="target" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <p class="text-2xl font-bold mono">84%</p>
+                    <p class="text-sm text-slate-500 mt-1">Technical: Strong</p>
+                </div>
+
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-slate-500">Job Applications</span>
+                        <i data-lucide="briefcase" class="w-4 h-4 text-slate-400"></i>
+                    </div>
+                    <p class="text-2xl font-bold mono">12 Active</p>
+                    <p class="text-sm text-amber-600 flex items-center gap-1 mt-1">
+                        <i data-lucide="clock" class="w-3 h-3"></i>
+                        4 interviews pending
+                    </p>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold">Portfolio Performance</h3>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 font-medium">1M</button>
+                            <button class="px-3 py-1 text-xs rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">3M</button>
+                            <button class="px-3 py-1 text-xs rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">1Y</button>
+                        </div>
+                    </div>
+                    <canvas id="portfolioChart" height="250"></canvas>
+                </div>
+
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <h3 class="font-semibold mb-4">Asset Allocation</h3>
+                    <canvas id="allocationChart" height="220"></canvas>
+                    <div class="mt-4 space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span>Stocks</span>
+                            <span class="font-medium">45%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-indigo-500"></span>ETFs</span>
+                            <span class="font-medium">30%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyan-500"></span>Bonds</span>
+                            <span class="font-medium">15%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-400"></span>Cash</span>
+                            <span class="font-medium">10%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Career Timeline & Tasks -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <h3 class="font-semibold mb-4">Career Roadmap Progress</h3>
+                    <div class="space-y-4">
+                        <div class="relative pl-8 pb-8 border-l-2 border-slate-200 dark:border-slate-700 last:pb-0">
+                            <div class="absolute -left-2 top-0 w-4 h-4 rounded-full bg-green-500 border-4 border-white dark:border-slate-900"></div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-medium">Financial Accounting</span>
+                                <span class="text-xs text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">Completed</span>
+                            </div>
+                            <p class="text-sm text-slate-500">Grade: A • Credits: 3.0</p>
+                        </div>
+                        <div class="relative pl-8 pb-8 border-l-2 border-slate-200 dark:border-slate-700 last:pb-0">
+                            <div class="absolute -left-2 top-0 w-4 h-4 rounded-full bg-blue-500 border-4 border-white dark:border-slate-900"></div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-medium">Investment Banking Prep</span>
+                                <span class="text-xs text-blue-600 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">In Progress (65%)</span>
+                            </div>
+                            <p class="text-sm text-slate-500">Technical Interview Package • 3 modules remaining</p>
+                        </div>
+                        <div class="relative pl-8 pb-8 border-l-2 border-slate-200 dark:border-slate-700 last:pb-0">
+                            <div class="absolute -left-2 top-0 w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-600 border-4 border-white dark:border-slate-900"></div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-medium">CFA Level I Preparation</span>
+                                <span class="text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">Scheduled</span>
+                            </div>
+                            <p class="text-sm text-slate-500">Start date: January 2025</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <h3 class="font-semibold mb-4">Upcoming Deadlines</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
+                            <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span class="text-red-600 font-bold text-sm">DEC<br>15</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-sm">Goldman Sachs Summer Analyst</p>
+                                <p class="text-xs text-red-600">Application closes in 2 days</p>
+                            </div>
+                            <button class="p-2 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-lg transition-colors">
+                                <i data-lucide="external-link" class="w-4 h-4 text-red-600"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span class="text-blue-600 font-bold text-sm">DEC<br>18</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-sm">Mock Interview: Morgan Stanley</p>
+                                <p class="text-xs text-slate-500">Scheduled with alumni mentor</p>
+                            </div>
+                            <button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                                <i data-lucide="video" class="w-4 h-4 text-slate-600"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <span class="text-purple-600 font-bold text-sm">JAN<br>05</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-sm">Resume Review Workshop</p>
+                                <p class="text-xs text-slate-500">Career Center • 2:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAREER HUB TAB -->
+        <div id="career-panel" class="tab-panel hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold">Career Command Center</h2>
+                    <p class="text-slate-500 mt-1">Target: Investment Banking • Bulge Bracket</p>
+                </div>
+                <button class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-lg shadow-blue-600/20">
+                    <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                    Export Resume (ATS)
+                </button>
+            </div>
+
+            <!-- Interview Prep Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flip-card h-64 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-inner relative w-full h-full">
+                        <div class="flip-front absolute w-full h-full glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-semibold">Technical</span>
+                                <i data-lucide="help-circle" class="w-5 h-5 text-slate-400"></i>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">Walk me through a DCF analysis</h3>
+                            <p class="text-sm text-slate-500 flex-1">Click to reveal the structured answer framework used by top bulge bracket banks.</p>
+                            <div class="flex items-center gap-2 text-xs text-slate-400 mt-4">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                Click to flip
+                            </div>
+                        </div>
+                        <div class="flip-back absolute w-full h-full bg-slate-900 text-white rounded-xl p-6 border border-slate-700 flex flex-col">
+                            <h3 class="font-bold text-lg mb-3 text-blue-400">Answer Framework</h3>
+                            <ol class="text-sm space-y-2 flex-1 overflow-y-auto">
+                                <li><strong>1. Project FCF:</strong> 5-10 year forecast using unlevered free cash flow</li>
+                                <li><strong>2. Terminal Value:</strong> Exit multiple or Gordon Growth method</li>
+                                <li><strong>3. WACC:</strong> Cost of equity (CAPM) + Cost of debt (after-tax)</li>
+                                <li><strong>4. Discount:</strong> PV of FCFs + PV of Terminal Value</li>
+                                <li><strong>5. Adjustments:</strong> Subtract net debt, add cash</li>
+                            </ol>
+                            <p class="text-xs text-slate-400 mt-3 italic">"Always mention sensitivity analysis"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-card h-64 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-inner relative w-full h-full">
+                        <div class="flip-front absolute w-full h-full glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-semibold">Markets</span>
+                                <i data-lucide="help-circle" class="w-5 h-5 text-slate-400"></i>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">Where is the 10-year Treasury?</h3>
+                            <p class="text-sm text-slate-500 flex-1">Current market knowledge test. Know the trend and drivers.</p>
+                            <div class="flex items-center gap-2 text-xs text-slate-400 mt-4">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                Click to flip
+                            </div>
+                        </div>
+                        <div class="flip-back absolute w-full h-full bg-slate-900 text-white rounded-xl p-6 border border-slate-700 flex flex-col">
+                            <h3 class="font-bold text-lg mb-3 text-purple-400">Answer Framework</h3>
+                            <div class="text-sm space-y-3 flex-1">
+                                <p><strong>Current:</strong> ~4.15% (as of today)</p>
+                                <p><strong>Trend:</strong> Down from 5.0% Oct peak</p>
+                                <p><strong>Drivers:</strong></p>
+                                <ul class="list-disc pl-4 space-y-1 text-slate-300">
+                                    <li>Fed dovish pivot expectations</li>
+                                    <li>Cooling inflation data</li>
+                                    <li>Safe haven demand</li>
+                                </ul>
+                            </div>
+                            <p class="text-xs text-green-400 mt-3">Updated real-time via market data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-card h-64 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-inner relative w-full h-full">
+                        <div class="flip-front absolute w-full h-full glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full text-xs font-semibold">Behavioral</span>
+                                <i data-lucide="help-circle" class="w-5 h-5 text-slate-400"></i>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">Tell me about a time you failed</h3>
+                            <p class="text-sm text-slate-500 flex-1">The trick question. Structure shows maturity.</p>
+                            <div class="flex items-center gap-2 text-xs text-slate-400 mt-4">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                Click to flip
+                            </div>
+                        </div>
+                        <div class="flip-back absolute w-full h-full bg-slate-900 text-white rounded-xl p-6 border border-slate-700 flex flex-col">
+                            <h3 class="font-bold text-lg mb-3 text-amber-400">STAR Method</h3>
+                            <div class="text-sm space-y-2 flex-1">
+                                <p><strong>S:</strong> Trading competition, over-leveraged position</p>
+                                <p><strong>T:</strong> Had to cut losses or risk total portfolio</p>
+                                <p><strong>A:</strong> Implemented stop-loss, rebalanced</p>
+                                <p><strong>R:</strong> Limited loss to 5%, learned risk management</p>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-3">Key: Show growth, not perfection</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Builder Section -->
+            <div class="glass-fin rounded-xl p-8 border border-slate-200 dark:border-slate-800">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold">ATS Resume Optimizer</h3>
+                        <p class="text-sm text-slate-500 mt-1">Finance-focused keyword analysis</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-32 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500 rounded-full" style="width: 92%"></div>
+                        </div>
+                        <span class="text-sm font-bold text-green-600">92% Match</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">Financial Modeling</span>
+                                <span class="text-green-600 text-sm">✓ Detected</span>
+                            </div>
+                            <p class="text-xs text-slate-500">3 mentions found in experience section</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">Valuation</span>
+                                <span class="text-green-600 text-sm">✓ Detected</span>
+                            </div>
+                            <p class="text-xs text-slate-500">DCF, Comparable Company Analysis mentioned</p>
+                        </div>
+                        <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">Excel/PowerPoint</span>
+                                <span class="text-red-600 text-sm">⚠ Missing</span>
+                            </div>
+                            <p class="text-xs text-red-600">Add "Advanced Excel" and "Pitch Book Creation"</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 text-slate-300 p-6 rounded-lg font-mono text-sm overflow-y-auto max-h-80">
+                        <div class="flex items-center gap-2 mb-4 pb-2 border-b border-slate-700">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span class="ml-2 text-xs text-slate-500">resume_james_mitchell.pdf</span>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-lg font-bold text-white">JAMES MITCHELL</p>
+                            <p class="text-xs text-slate-400">james.mitchell@email.com • (555) 123-4567 • New York, NY</p>
+                            <br>
+                            <p class="text-white font-semibold">EDUCATION</p>
+                            <p>University of Pennsylvania, Wharton School</p>
+                            <p class="text-slate-400">B.S. Economics, Finance Concentration | GPA: 3.82/4.0</p>
+                            <br>
+                            <p class="text-white font-semibold">EXPERIENCE</p>
+                            <p class="text-slate-200">Evercore – Summer Analyst (Incoming)</p>
+                            <p class="text-slate-400 text-xs">New York, NY | June 2024</p>
+                            <br>
+                            <p class="text-slate-200">University Investment Office – Analyst</p>
+                            <p class="text-slate-400 text-xs">Philadelphia, PA | Sept 2023 – Present</p>
+                            <ul class="list-disc pl-4 text-xs mt-1 space-y-1">
+                                <li>Manage $2.4B endowment portfolio, performing asset allocation analysis</li>
+                                <li>Built DCF models for 15+ potential PE fund investments</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVESTMENT LAB TAB -->
+        <div id="invest-panel" class="tab-panel hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold">Investment Lab</h2>
+                    <p class="text-slate-500 mt-1">Paper trading simulator with $100,000 virtual portfolio</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500">Buying Power</p>
+                        <p class="font-bold mono">$45,230.50</p>
+                    </div>
+                    <div class="w-px bg-slate-300 dark:bg-slate-700"></div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500">Portfolio Value</p>
+                        <p class="font-bold mono text-green-600">$142,450.20</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Interface -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Stock Chart -->
+                <div class="lg:col-span-2 glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <h3 class="font-bold text-2xl">AAPL</h3>
+                                <p class="text-sm text-slate-500">Apple Inc. • NASDAQ</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold">$195.89</p>
+                                <p class="text-sm text-green-600 flex items-center gap-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                    +2.45 (+1.27%)
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">Buy</button>
+                            <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">Sell</button>
+                        </div>
+                    </div>
+                    <canvas id="stockChart" height="300"></canvas>
+                    <div class="flex justify-center gap-2 mt-4">
+                        <button class="px-4 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 font-medium">1D</button>
+                        <button class="px-4 py-1 text-xs rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">1W</button>
+                        <button class="px-4 py-1 text-xs rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">1M</button>
+                        <button class="px-4 py-1 text-xs rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">3M</button>
+                        <button class="px-4 py-1 text-xs rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">1Y</button>
+                    </div>
+                </div>
+
+                <!-- Order Panel -->
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <h3 class="font-semibold mb-4">Place Order</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Symbol</label>
+                            <input type="text" value="AAPL" class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Quantity</label>
+                            <input type="number" value="10" class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Order Type</label>
+                            <select class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                <option>Market Order</option>
+                                <option>Limit Order</option>
+                                <option>Stop Loss</option>
+                            </select>
+                        </div>
+                        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-slate-500">Est. Total</span>
+                                <span class="font-bold mono">$1,958.90</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-500">Commissions</span>
+                                <span class="font-bold mono text-green-600">$0.00</span>
+                            </div>
+                        </div>
+                        <button class="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors">
+                            Confirm Buy Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Holdings -->
+            <div class="glass-fin rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div class="p-6 border-b border-slate-200 dark:border-slate-800">
+                    <h3 class="font-semibold">Current Holdings</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase">
+                            <tr>
+                                <th class="px-6 py-3 font-semibold">Symbol</th>
+                                <th class="px-6 py-3 font-semibold">Shares</th>
+                                <th class="px-6 py-3 font-semibold">Avg Cost</th>
+                                <th class="px-6 py-3 font-semibold">Current</th>
+                                <th class="px-6 py-3 font-semibold">Total Value</th>
+                                <th class="px-6 py-3 font-semibold">P/L</th>
+                                <th class="px-6 py-3 font-semibold">% of Port</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                <td class="px-6 py-4 font-medium">AAPL</td>
+                                <td class="px-6 py-4 mono">50</td>
+                                <td class="px-6 py-4 mono">$178.50</td>
+                                <td class="px-6 py-4 mono">$195.89</td>
+                                <td class="px-6 py-4 mono font-medium">$9,794.50</td>
+                                <td class="px-6 py-4 text-green-600 mono">+$869.50</td>
+                                <td class="px-6 py-4">6.9%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                <td class="px-6 py-4 font-medium">MSFT</td>
+                                <td class="px-6 py-4 mono">30</td>
+                                <td class="px-6 py-4 mono">$312.40</td>
+                                <td class="px-6 py-4 mono">$378.91</td>
+                                <td class="px-6 py-4 mono font-medium">$11,367.30</td>
+                                <td class="px-6 py-4 text-green-600 mono">+$1,995.30</td>
+                                <td class="px-6 py-4">8.0%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                <td class="px-6 py-4 font-medium">NVDA</td>
+                                <td class="px-6 py-4 mono">20</td>
+                                <td class="px-6 py-4 mono">$420.15</td>
+                                <td class="px-6 py-4 mono">$495.22</td>
+                                <td class="px-6 py-4 mono font-medium">$9,904.40</td>
+                                <td class="px-6 py-4 text-green-600 mono">+$1,501.40</td>
+                                <td class="px-6 py-4">7.0%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                <td class="px-6 py-4 font-medium">VTI</td>
+                                <td class="px-6 py-4 mono">100</td>
+                                <td class="px-6 py-4 mono">$215.30</td>
+                                <td class="px-6 py-4 mono">$248.75</td>
+                                <td class="px-6 py-4 mono font-medium">$24,875.00</td>
+                                <td class="px-6 py-4 text-green-600 mono">+$3,345.00</td>
+                                <td class="px-6 py-4">17.5%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FINANCIAL TOOLS TAB -->
+        <div id="tools-panel" class="tab-panel hidden space-y-6">
+            <h2 class="text-3xl font-bold">Financial Toolkit</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- DCF Calculator -->
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <i data-lucide="calculator" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <h3 class="font-semibold">Quick DCF</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-slate-500">FCF Year 1 ($M)</label>
+                            <input type="number" id="dcf-fcf" value="100" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500">Growth Rate (%)</label>
+                            <input type="number" id="dcf-growth" value="5" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500">WACC (%)</label>
+                            <input type="number" id="dcf-wacc" value="10" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500">Terminal Growth (%)</label>
+                            <input type="number" id="dcf-terminal" value="2" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <button onclick="calculateDCF()" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">Calculate</button>
+                        <div id="dcf-result" class="hidden p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-900/30">
+                            <p class="text-xs text-slate-500">Enterprise Value</p>
+                            <p class="text-lg font-bold text-green-600 mono" id="dcf-value">$1,428.57M</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compound Interest -->
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <i data-lucide="trending-up" class="w-5 h-5 text-purple-600"></i>
+                        </div>
+                        <h3 class="font-semibold">Compound Interest</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-slate-500">Initial Investment</label>
+                            <input type="number" id="ci-principal" value="10000" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500">Monthly Contribution</label>
+                            <input type="number" id="ci-monthly" value="500" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500">Annual Return (%)</label>
+                            <input type="number" id="ci-rate" value="7" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500">Years</label>
+                            <input type="number" id="ci-years" value="10" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <button onclick="calculateCI()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors">Calculate</button>
+                        <div id="ci-result" class="hidden p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-900/30">
+                            <p class="text-xs text-slate-500">Future Value</p>
+                            <p class="text-lg font-bold text-purple-600 mono" id="ci-value">$108,829</p>
+                            <p class="text-xs text-slate-500 mt-1">Total Contributions: <span id="ci-contributions">$70,000</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Loan Payoff -->
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                            <i data-lucide="graduation-cap" class="w-5 h-5 text-amber-600"></i>
+                        </div>
+                        <h3 class="font-semibold">Loan Payoff</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-slate-500">Loan Balance</label>
+                            <input type="number" id="loan-balance" value="25000" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500">Interest Rate (%)</label>
+                            <input type="number" id="loan-rate" value="5.5" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-slate-500">Monthly Payment</label>
+                            <input type="number" id="loan-payment" value="300" class="calc-input w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                        <button onclick="calculateLoan()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition-colors">Calculate</button>
+                        <div id="loan-result" class="hidden space-y-2">
+                            <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-900/30">
+                                <p class="text-xs text-slate-500">Payoff Date</p>
+                                <p class="text-lg font-bold text-amber-600" id="loan-date">August 2032</p>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                <p class="text-xs text-slate-500">Total Interest</p>
+                                <p class="text-sm font-bold text-slate-700 dark:text-slate-300 mono" id="loan-interest">$5,420</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Tracker -->
+            <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <i data-lucide="wallet" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                        <h3 class="font-semibold">College Budget Planner</h3>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500">Remaining this month</p>
+                        <p class="text-xl font-bold text-green-600 mono">$342.50</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <p class="text-xs text-slate-500 mb-1">Income</p>
+                        <p class="font-bold text-green-600">+$2,400</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <p class="text-xs text-slate-500 mb-1">Rent</p>
+                        <p class="font-bold text-red-600">-$800</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <p class="text-xs text-slate-500 mb-1">Food</p>
+                        <p class="font-bold text-red-600">-$450</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <p class="text-xs text-slate-500 mb-1">Entertainment</p>
+                        <p class="font-bold text-red-600">-$200</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                            <i data-lucide="lightbulb" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-sm">AI Financial Insight</p>
+                            <p class="text-xs text-slate-500">Based on your spending patterns</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 max-w-md text-right">
+                        You're spending 23% more on dining out than last month. Consider the meal plan upgrade to save ~$150/month.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEARNING CENTER TAB -->
+        <div id="learn-panel" class="tab-panel hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold">Learning Center</h2>
+                    <p class="text-slate-500 mt-1">Master financial concepts • 12 modules completed</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500">Current Streak</p>
+                        <p class="font-bold text-orange-600">🔥 14 days</p>
+                    </div>
+                    <div class="w-px h-8 bg-slate-300 dark:bg-slate-700"></div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500">XP Points</p>
+                        <p class="font-bold text-blue-600">2,450</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium">Investment Banking</span>
+                        <span class="text-xs text-blue-600 font-bold">85%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
+                        <div class="h-full bg-blue-500 rounded-full" style="width: 85%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500">17 of 20 lessons complete</p>
+                </div>
+
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium">Financial Modeling</span>
+                        <span class="text-xs text-purple-600 font-bold">60%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
+                        <div class="h-full bg-purple-500 rounded-full" style="width: 60%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500">12 of 20 lessons complete</p>
+                </div>
+
+                <div class="glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium">Markets & Trading</span>
+                        <span class="text-xs text-green-600 font-bold">40%</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mb-2">
+                        <div class="h-full bg-green-500 rounded-full" style="width: 40%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500">8 of 20 lessons complete</p>
+                </div>
+            </div>
+
+            <!-- Current Lesson -->
+            <div class="glass-fin rounded-xl p-8 border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20">
+                <div class="flex items-start gap-6">
+                    <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-600/20">
+                        <i data-lucide="play" class="w-8 h-8 text-white ml-1"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded font-medium">Module 8</span>
+                            <span class="text-xs text-slate-500">Investment Banking</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">M&A Deal Structures: Stock vs. Cash Consideration</h3>
+                        <p class="text-slate-600 dark:text-slate-400 mb-4 max-w-2xl">
+                            Learn how to analyze accretion/dilution in mergers & acquisitions. Compare EPS impact of stock versus cash deals and understand the tax implications for shareholders.
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <button class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors flex items-center gap-2">
+                                Continue Learning
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                            <span class="text-sm text-slate-500">15 min remaining</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="finance-card glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 cursor-pointer group">
+                    <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
+                        <i data-lucide="building-2" class="w-6 h-6 text-slate-600 dark:text-slate-400 group-hover:text-blue-600"></i>
+                    </div>
+                    <h4 class="font-semibold mb-1">Investment Banking</h4>
+                    <p class="text-xs text-slate-500 mb-3">20 lessons • 8 hours</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <img src="https://i.pravatar.cc/150?img=33" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800">
+                            <img src="https://i.pravatar.cc/150?img=34" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800">
+                            <div class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs">+2k</div>
+                        </div>
+                        <span class="text-xs font-medium text-blue-600">Resume</span>
+                    </div>
+                </div>
+
+                <div class="finance-card glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800 hover:border-purple-300 dark:hover:border-purple-700 cursor-pointer group">
+                    <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30 transition-colors">
+                        <i data-lucide="sheet" class="w-6 h-6 text-slate-600 dark:text-slate-400 group-hover:text-purple-600"></i>
+                    </div>
+                    <h4 class="font-semibold mb-1">Excel Modeling</h4>
+                    <p class="text-xs text-slate-500 mb-3">15 lessons • 6 hours</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <img src="https://i.pravatar.cc/150?img=35" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800">
+                            <div class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs">+1.5k</div>
+                        </div>
+                        <span class="text-xs font-medium text-purple-600">Start</span>
+                    </div>
+                </div>
+
+                <div class="finance-card glass-fin rounded-xl p-6 border border-slate-200 dark:border-slate-800 hover:border-green-300 dark:hover:border-green-700 cursor-pointer group">
+                    <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center mb-4 group-hover:bg-green-100 dark:group-hover:bg-green-900/30 transition-colors">
+                        <i data-lucide="line-chart" class="w-6 h-6 text-slate-600 dark:text-slate-400 group-hover:text-green-600"></i>
+                    </div>
+                    <h4 class="font-semibold mb-1">Equity Research</h4>
+                    <p class="text-xs text-slate-500 mb-3">12 lessons • 5 hours</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <img src="https://i.pravatar.cc/150?img=36" class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800">
+                            <div class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs">+800</div>
+                        </div>
+                        <span class="text-xs font-medium text-green-600">Start</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Theme Toggle
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+            document.getElementById(tabName + '-panel').classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'dark:text-blue-400');
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.add('text-blue-600', 'dark:text-blue-400');
+                }
+            });
+
+            lucide.createIcons();
+
+            // Initialize charts when tab is shown
+            if (tabName === 'dashboard') setTimeout(initDashboardCharts, 100);
+            if (tabName === 'invest') setTimeout(initStockChart, 100);
+        }
+
+        // DCF Calculator
+        function calculateDCF() {
+            const fcf = parseFloat(document.getElementById('dcf-fcf').value);
+            const growth = parseFloat(document.getElementById('dcf-growth').value) / 100;
+            const wacc = parseFloat(document.getElementById('dcf-wacc').value) / 100;
+            const terminal = parseFloat(document.getElementById('dcf-terminal').value) / 100;
+
+            // Simplified 5-year DCF
+            let pv = 0;
+            for (let i = 1; i <= 5; i++) {
+                const yearFCF = fcf * Math.pow(1 + growth, i);
+                pv += yearFCF / Math.pow(1 + wacc, i);
+            }
+
+            // Terminal Value
+            const terminalFCF = fcf * Math.pow(1 + growth, 5) * (1 + terminal);
+            const terminalValue = terminalFCF / (wacc - terminal);
+            const pvTerminal = terminalValue / Math.pow(1 + wacc, 5);
+
+            const totalValue = pv + pvTerminal;
+
+            document.getElementById('dcf-value').textContent = '$' + totalValue.toFixed(2) + 'M';
+            document.getElementById('dcf-result').classList.remove('hidden');
+        }
+
+        // Compound Interest
+        function calculateCI() {
+            const principal = parseFloat(document.getElementById('ci-principal').value);
+            const monthly = parseFloat(document.getElementById('ci-monthly').value);
+            const rate = parseFloat(document.getElementById('ci-rate').value) / 100 / 12;
+            const years = parseFloat(document.getElementById('ci-years').value);
+            const months = years * 12;
+
+            // FV = P(1+r)^n + PMT[((1+r)^n - 1)/r]
+            const fvPrincipal = principal * Math.pow(1 + rate, months);
+            const fvContributions = monthly * (Math.pow(1 + rate, months) - 1) / rate;
+            const total = fvPrincipal + fvContributions;
+            const contributions = principal + (monthly * months);
+
+            document.getElementById('ci-value').textContent = '$' + total.toLocaleString('en-US', {maximumFractionDigits: 0});
+            document.getElementById('ci-contributions').textContent = '$' + contributions.toLocaleString('en-US', {maximumFractionDigits: 0});
+            document.getElementById('ci-result').classList.remove('hidden');
+        }
+
+        // Loan Calculator
+        function calculateLoan() {
+            const balance = parseFloat(document.getElementById('loan-balance').value);
+            const rate = parseFloat(document.getElementById('loan-rate').value) / 100 / 12;
+            const payment = parseFloat(document.getElementById('loan-payment').value);
+
+            let remaining = balance;
+            let months = 0;
+            let totalInterest = 0;
+
+            while (remaining > 0 && months < 360) {
+                const interest = remaining * rate;
+                totalInterest += interest;
+                remaining = remaining + interest - payment;
+                months++;
+            }
+
+            const payoffDate = new Date();
+            payoffDate.setMonth(payoffDate.getMonth() + months);
+
+            document.getElementById('loan-date').textContent = payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            document.getElementById('loan-interest').textContent = '$' + totalInterest.toLocaleString('en-US', {maximumFractionDigits: 0});
+            document.getElementById('loan-result').classList.remove('hidden');
+        }
+
+        // Initialize Charts
+        function initDashboardCharts() {
+            // Portfolio Performance Chart
+            const ctx1 = document.getElementById('portfolioChart');
+            if (ctx1) {
+                new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Portfolio Value',
+                            data: [10000, 10500, 11200, 10800, 11500, 12200, 12800, 13500, 14200, 13800, 14500, 15232],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Allocation Pie Chart
+            const ctx2 = document.getElementById('allocationChart');
+            if (ctx2) {
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Stocks', 'ETFs', 'Bonds', 'Cash'],
+                        datasets: [{
+                            data: [45, 30, 15, 10],
+                            backgroundColor: ['#3b82f6', '#6366f1', '#06b6d4', '#94a3b8'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        function initStockChart() {
+            const ctx = document.getElementById('stockChart');
+            if (ctx) {
+                // Generate intraday data
+                const labels = [];
+                const data = [];
+                let price = 193.20;
+
+                for (let i = 9; i <= 16; i++) {
+                    for (let j = 0; j < 60; j += 15) {
+                        labels.push(`${i}:${j.toString().padStart(2, '0')}`);
+                        price += (Math.random() - 0.45) * 0.8;
+                        data.push(price);
+                    }
+                }
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'AAPL',
+                            data: data,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { display: false },
+                            y: {
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toFixed(2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initDashboardCharts();
+        });
+    </script>
+</body>
+</html>
